@@ -62,8 +62,7 @@ class YoutubeAPI:
             parameters.update({'pageToken': next_page_token})
 
     # 단순히 page token을 통해 전부 가져올 시 동영상이 누락되는 현상이 있어, 1달 간격으로 나눠서 수집
-    def get_all_videos(self):
-        published_before = datetime.datetime.now()
+    def get_all_videos(self, published_before):
         first_day = datetime.datetime(year=published_before.year, month=published_before.month, day=1)
         published_after = first_day - relativedelta(microseconds=1)
 
