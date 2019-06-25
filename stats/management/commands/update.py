@@ -49,7 +49,6 @@ class Command(BaseCommand):
                                                "description": video_detail['snippet']['description'],
                                                "published_at": published_at
                                            })
-
             self.save_stat(video_detail)
 
     def save_stat(self, video_detail):
