@@ -22,5 +22,5 @@ class Stats(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.id:
-            self.created_at = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc).replace(microsecond=0)
+            self.created_at = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc, microsecond=0)
         return super(Stats, self).save(*args, **kwargs)
