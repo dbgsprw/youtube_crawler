@@ -13,7 +13,7 @@ import datetime
 class YoutubeTestCase(TestCase):
     def setUp(self):
         self.youtube_api = YoutubeAPI(channel_id="channel_id",
-                                      key_list=["key1"])
+                                      key="key1")
 
     def test_get_full_uri(self):
         actual = self.youtube_api.get_full_uri("foo", {'foo': 'bar'})
@@ -40,7 +40,7 @@ class CommandsTestCase(TestCase):
 
     @patch.object(YoutubeAPI, 'get')
     def test_update(self, mock_get):
-        args = ["channel_id", "key1", "key2"]
+        args = ["channel_id", "key1"]
         opts = {}
         call_command('update', *args, **opts)
         mock_get.assert_called()

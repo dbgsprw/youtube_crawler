@@ -13,11 +13,11 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('channel_id', help='youtube channel id')
-        parser.add_argument('key_list', nargs='+', type=str, help='comma separated api key list')
+        parser.add_argument('key', help='Google api key')
 
     def handle(self, *args, **options):
         self.youtube_api = _youtube.YoutubeAPI(channel_id=options['channel_id'],
-                                               key_list=options['key_list'])
+                                               key=options['key'])
 
         self.update_video_stats_from(self.get_new_video_ids_from_api())
 

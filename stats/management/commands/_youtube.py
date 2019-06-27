@@ -1,5 +1,4 @@
 import datetime
-import secrets
 from urllib import parse
 
 import requests
@@ -12,12 +11,12 @@ class YoutubeAPI:
 
     YOUTUBE_API_URI = 'https://www.googleapis.com/youtube/v3'
 
-    def __init__(self, channel_id, key_list):
+    def __init__(self, channel_id, key):
         self.channel_id = channel_id
-        self.key_list = key_list
+        self.key = key
 
     def get_full_uri(self, api, parameters):
-        parameters.update(key=secrets.choice(self.key_list))
+        parameters.update(key=self.key)
         query_strings = parse.urlencode(parameters)
         return f'{self.YOUTUBE_API_URI}/{api}?{query_strings}'
 
