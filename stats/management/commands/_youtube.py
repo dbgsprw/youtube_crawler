@@ -2,7 +2,6 @@ import datetime
 from urllib import parse
 
 import requests
-from dateutil.relativedelta import relativedelta
 
 
 class YoutubeAPI:
@@ -10,24 +9,6 @@ class YoutubeAPI:
         pass
 
     YOUTUBE_API_URI = 'https://www.googleapis.com/youtube/v3'
-
-    def __init__(self, channel_id, key):
-        self.channel_id = channel_id
-        self.key = key
-
-    def get_full_uri(self, api, parameters):
-        parameters.update(key=self.key)
-        query_strings = parse.urlencode(parameters)
-        return f'{self.YOUTUBE_API_URI}/{api}?{query_strings}'
-
-    def get(self, api, parameters):
-        uri = self.get_full_uri(api=api, parameters=parameters)
-        response = requests.get(uri)
-
-        if response.status_code == 200:
-            return requests.get(uri).json()
-        else:
-            raise self.YoutubeAPIException(response.json())
 
     def get_popular_videos(self):
         return self.get(api='videos',
@@ -41,11 +22,28 @@ class YoutubeAPI:
         response = self.get(api='videos',
                             parameters={
                                 'id': ','.join(video_id_list),
-                                'part': 'snippet, statistics'
+                                'part': 'statistics'
                             })
 
         for item in response['items']:
             yield item
+
+    def get_videos_after(self, latest_video):
+        parameters = {
+            'part': 'id, snippet',
+            'type': 'video',
+            'channelId': self.channel_id,
+            'maxResults': 50,
+            'order': 'date',
+        }
+
+        if latest_video:
+            parameters.update({
+                'publishedAfter': (latest_video.published_at +
+                                   datetime.timedelta(seconds=1)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+            })
+
+        yield from self.get_videos_with_pagination(parameters)
 
     def get_videos_with_pagination(self, parameters):
         while True:
@@ -60,24 +58,20 @@ class YoutubeAPI:
             next_page_token = response['nextPageToken']
             parameters.update({'pageToken': next_page_token})
 
-    # 단순히 page token을 통해 전부 가져올 시 동영상이 누락되는 현상이 있어, 1달 간격으로 나눠서 수집
-    def get_all_videos(self, published_before):
-        published_before = published_before.replace(tzinfo=None)
-        first_day = datetime.datetime(year=published_before.year, month=published_before.month, day=1)
-        published_after = first_day - relativedelta(microseconds=1)
+    def __init__(self, channel_id, key):
+        self.channel_id = channel_id
+        self.key = key
 
-        while published_before > datetime.datetime(2013, 12, 31, 23, 59, 59, 999999):
-            parameters = {
-                'part': 'id',
-                'type': 'video',
-                'channelId': self.channel_id,
-                'maxResults': 50,
-                'order': 'date',
-                'publishedAfter': published_after.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
-                'publishedBefore': published_before.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-            }
+    def get(self, api, parameters):
+        uri = self.get_full_uri(api=api, parameters=parameters)
+        response = requests.get(uri)
 
-            yield from self.get_videos_with_pagination(parameters)
+        if response.status_code == 200:
+            return requests.get(uri).json()
+        else:
+            raise self.YoutubeAPIException(response.json())
 
-            published_before = published_after
-            published_after = published_after - relativedelta(months=1)
+    def get_full_uri(self, api, parameters):
+        parameters.update(key=self.key)
+        query_strings = parse.urlencode(parameters)
+        return f'{self.YOUTUBE_API_URI}/{api}?{query_strings}'
