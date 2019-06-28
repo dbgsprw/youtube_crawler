@@ -31,4 +31,4 @@ class Command(BaseCommand):
 
         Video.objects.create(id=video_detail['id']['videoId'], channel_id=video_detail['snippet']['channelId'],
                              title=video_detail['snippet']['title'], description=video_detail['snippet']['description'],
-                             published_at=published_at)
+                             published_at=published_at, thumbnail=video_detail['snippet']['thumbnails']['high'])

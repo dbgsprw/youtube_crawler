@@ -9,6 +9,7 @@ class Video(models.Model):
     title = models.CharField(max_length=200, null=True)
     description = models.TextField(null=True)
     published_at = models.DateTimeField(null=True)
+    thumbnail = models.URLField(null=True)
 
 
 class Stats(models.Model):
