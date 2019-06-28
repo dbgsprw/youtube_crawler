@@ -18,11 +18,11 @@ class YoutubeAPI:
                             'part': 'snippet, contentDetails, statistics, status'
                         })
 
-    def get_videos_by_id_list(self, video_id_list):
+    def get_videos_by_id_list(self, video_id_list, part):
         response = self.get(api='videos',
                             parameters={
                                 'id': ','.join(video_id_list),
-                                'part': 'statistics'
+                                'part': part
                             })
 
         for item in response['items']:
