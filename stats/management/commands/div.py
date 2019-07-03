@@ -1,5 +1,3 @@
-from django.core.management.base import BaseCommand
-
 from collections import defaultdict
 
 from django.core.management.base import BaseCommand
@@ -29,4 +27,3 @@ class Command(BaseCommand):
               if len(stat_list) >= 2]
 
         ll = sorted(ll, key=lambda x: x[1], reverse=True)
-
