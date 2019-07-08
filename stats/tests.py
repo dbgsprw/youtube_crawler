@@ -6,7 +6,7 @@ from django.core.management.base import CommandError
 from django.test import TestCase
 
 from stats.management.commands._youtube import YoutubeAPI
-from stats.management.commands.div import get_average_view
+from stats.management.commands.div import get_average_view_per_seconds
 from stats.models import Stats, Video
 
 
@@ -64,6 +64,6 @@ class DivTestCase(TestCase):
                       view_count=100)
         newer = Stats(created_at=datetime.datetime(2015, 1, 1, 1, 2, 40),
                       view_count=199)
-        average_view = get_average_view(newer_stat=newer, older_stat=older)
+        average_view = get_average_view_per_seconds(newer_stat=newer, older_stat=older)
         print(average_view)
         self.assertEqual(average_view, 1)

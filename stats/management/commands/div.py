@@ -1,13 +1,28 @@
-from collections import defaultdict
-
 from django.core.management.base import BaseCommand
 
 from stats.models import Stats
 
 
-def get_average_view(older_stat, newer_stat):
+def get_average_view_per_seconds(older_stat, newer_stat):
     return (newer_stat.view_count - older_stat.view_count) / \
            (newer_stat.created_at - older_stat.created_at).total_seconds()
+
+
+def sort_by_view_count_in_range(start_day, end_day):
+    def func(video):
+        try:
+            older_stat = video.stats_set.filter(created_at__gte=start_day).order_by('created_at')[0]
+            newer_stat = video.stats_set.filter(created_at__lte=end_day).order_by('-created_at')[0]
+        except IndexError as e:
+            return 0
+
+        if newer_stat == older_stat:
+            older_stat = Stats(view_count=0, created_at=video.published_at)
+
+        video.average_view = get_average_view_per_seconds(older_stat, newer_stat)
+        return video.average_view
+
+    return func
 
 
 class Command(BaseCommand):
@@ -17,13 +32,4 @@ class Command(BaseCommand):
         pass
 
     def handle(self, *args, **options):
-        stat_dict = defaultdict(list)
-
-        for stat in Stats.objects.all().order_by("-created_at"):
-            stat_dict[stat.video_id].append(stat)
-
-        ll = [(stat_list[0].video_id, get_average_view(stat_list[1],
-                                                       stat_list[0])) for key, stat_list in stat_dict.items()
-              if len(stat_list) >= 2]
-
-        ll = sorted(ll, key=lambda x: x[1], reverse=True)
+        pass
