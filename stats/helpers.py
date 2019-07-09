@@ -14,3 +14,4 @@ def get_sliced_list(generator, number=50):
 def get_video_id(video_detail):
     return video_detail['id']['videoId'] if type(video_detail['id']) == dict else video_detail['id']
 
+

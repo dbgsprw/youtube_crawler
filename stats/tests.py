@@ -5,12 +5,12 @@ from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.test import TestCase
 
+from stats import services
 from stats.management.commands._youtube import YoutubeAPI
-from stats.management.commands.div import get_average_view_per_seconds
 from stats.models import Stats, Video
 
 
-class YoutubeTestCase(TestCase):
+class UpdateYoutubeTestCase(TestCase):
     def setUp(self):
         self.youtube_api = YoutubeAPI(channel_id="channel_id",
                                       key="key1")
@@ -57,13 +57,26 @@ class CommandsTestCase(TestCase):
             call_command('update', *args, **opts)
 
 
-class DivTestCase(TestCase):
+class ServiceTestCase(TestCase):
+
+    @patch.object(Video, 'stats_set',
+                  return_value=[None])
+    @patch.object(services, '_get_average_view_per_seconds',
+                  return_value=100)
+    def test_calculate_view_diff(self, mock_function, mock_set):
+        test_video = Video()
+        test_start_day = datetime.datetime(2015, 1, 1, 1, 1, 1)
+        test_end_day = test_start_day + datetime.timedelta(days=1)
+        total_seconds = (test_end_day - test_start_day).total_seconds()
+        self.assertEqual(100 * total_seconds,
+                         services.calculate_view_diff(test_video, test_start_day, test_end_day))
+
+        mock_set.filter.assert_called()
 
     def test_get_average_view(self):
         older = Stats(created_at=datetime.datetime(2015, 1, 1, 1, 1, 1),
                       view_count=100)
         newer = Stats(created_at=datetime.datetime(2015, 1, 1, 1, 2, 40),
                       view_count=199)
-        average_view = get_average_view_per_seconds(newer_stat=newer, older_stat=older)
-        print(average_view)
+        average_view = services._get_average_view_per_seconds(newer_stat=newer, older_stat=older)
         self.assertEqual(average_view, 1)

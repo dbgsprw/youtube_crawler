@@ -2,7 +2,8 @@ import datetime
 
 from django.core.management.base import BaseCommand
 
-from stats.management.commands import _youtube, _helper
+from stats.management.commands import _youtube
+from stats import helpers
 from stats.models import Video
 
 
@@ -25,7 +26,7 @@ class Command(BaseCommand):
             self.create_new_videos()
 
     def update_existing_videos(self):
-        for video_id_list in _helper.get_sliced_list(Video.objects.order_by('-published_at').all().iterator()):
+        for video_id_list in helpers.get_sliced_list(Video.objects.order_by('-published_at').all().iterator()):
             for video_detail in self.youtube_api.get_videos_by_id_list(video_id_list, part='snippet'):
                 self.create_or_update_video(video_detail)
 
@@ -41,7 +42,7 @@ class Command(BaseCommand):
         published_at = datetime.datetime.strptime(video_detail['snippet']['publishedAt'],
                                                   '%Y-%m-%dT%H:%M:%S.000Z').replace(tzinfo=datetime.timezone.utc)
 
-        Video.objects.update_or_create(id=_helper.get_video_id(video_detail),
+        Video.objects.update_or_create(id=helpers.get_video_id(video_detail),
                                        defaults={
                                            "channel_id": video_detail['snippet']['channelId'],
                                            "title": video_detail['snippet']['title'],
