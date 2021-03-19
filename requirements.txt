@@ -1,4 +1,4 @@
 Django==2.2.13
-djangorestframework==3.9.4
+djangorestframework==3.11.2
 python-dateutil==2.8.0
 requests==2.22.0
